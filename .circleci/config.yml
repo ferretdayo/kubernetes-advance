@@ -25,7 +25,7 @@ jobs:
           root: .
           paths:
             - .
-  push-docker-image:
+  staging-push-docker-image:
     docker:
       # specify the version you desire here
       - image: docker:17.05.0-ce-git
@@ -34,17 +34,46 @@ jobs:
       - setup_remote_docker
       - attach_workspace:
           at: .
-      - run: docker build -t ferretdayo/mounting-frontend:latest .
-          # command: docker build -t ferretdayo/mounting-frontend:${CIRCLE_TAG} .
-      - run: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-      - run: docker push ferretdayo/mounting-frontend:latest
-          # command: docker push ferretdayo/mounting-frontend:${CIRCLE_TAG}
+      - run:
+          name: build docker image
+          command: docker build -t ferretdayo/staging-kubernetes-advance:latest . && docker build -t ferretdayo/staging-kubernetes-advance:${CIRCLE_TAG} .
+      - run:
+          name: login docker-hub
+          command: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+      - run:
+          name: push image for docker-hub
+          command: docker push ferretdayo/staging-kubernetes-advance:latest && docker push ferretdayo/staging-kubernetes-advance:${CIRCLE_TAG}
+  production-push-docker-image:
+    docker:
+      # specify the version you desire here
+      - image: docker:17.05.0-ce-git
+    working_directory: ~/repo
+    steps:
+      - setup_remote_docker
+      - attach_workspace:
+          at: .
+      - run:
+          name: build docker image
+          command: docker build -t ferretdayo/production-kubernetes-advance:latest . && docker build -t ferretdayo/production-kubernetes-advance:${CIRCLE_TAG} .
+      - run:
+          name: login docker-hub
+          command: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+      - run:
+          name: push image for docker-hub
+          command: docker push ferretdayo/production-kubernetes-advance:latest && docker push ferretdayo/production-kubernetes-advance:${CIRCLE_TAG}
 workflows:
   version: 2
   build_and_deploy:
     jobs:
       - build
-      - push-docker-image:
+      - staging-push-docker-image:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - develop
+      - production-push-docker-image:
           requires:
             - build
           filters:

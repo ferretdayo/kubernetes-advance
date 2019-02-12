@@ -1,0 +1,37 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  labels:
+    app: frontend
+    env: stg
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: frontend
+      env: stg
+  template:
+    metadata:
+      labels:
+        app: frontend
+        env: stg
+    spec:
+      containers:
+      - name: frontend
+        image: ferretdayo/mounting-frontend:latest
+        ports:
+        - containerPort: 8000
+        livenessProbe:
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          httpGet:
+            path: /
+            port: 8000
+        readinessProbe:
+          initialDelaySeconds: 5
+          periodSeconds: 20
+          httpGet:
+            path: /
+            port: 8000
