@@ -5,22 +5,22 @@ metadata:
   name: frontend-deployment
   labels:
     app: frontend
-    env: stg
+    env: prod
 spec:
   replicas: 3
   selector:
     matchLabels:
       app: frontend
-      env: stg
+      env: prod
   template:
     metadata:
       labels:
         app: frontend
-        env: stg
+        env: prod
     spec:
       containers:
       - name: frontend
-        image: ferretdayo/mounting-frontend:latest
+        image: ferretdayo/production-kubernetes-advance:latest
         ports:
         - containerPort: 8000
         livenessProbe:
